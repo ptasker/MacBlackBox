@@ -63,16 +63,16 @@ do
 		# Capture up to four screens with no sound, of type jpg
 		timestamp=$(date +%Y%m%d%H%M%S)
 		label=$(date)
-		screencapture -x -tjpg ${timestamp}_1.jpg ${timestamp}_2.jpg ${timestamp}_3.jpg ${timestamp}_4.jpg
+		screencapture -x -tpng ${timestamp}_1.png ${timestamp}_2.png ${timestamp}_3.png ${timestamp}_4.png
 
 		# Use imagemagick to overlay the current time over the images so that we see when each 
 		# capture was taken since the clock is not always visible
 		for i in `seq 1 4`
 		do
 			# If we have a capture for this screen
-			if [ -f ${timestamp}_${i}.jpg ]
+			if [ -f ${timestamp}_${i}.png ]
 			then
-				convert ${timestamp}_${i}.jpg -fill white  -undercolor '#00000080'  -gravity South -annotate +0+5 "${label}" ${timestamp}_${i}.jpg
+				convert ${timestamp}_${i}.png -fill white  -undercolor '#00000080'  -gravity South -annotate +0+5 "${label}" ${timestamp}_${i}.png
 			fi
 		done
 	fi
@@ -86,10 +86,10 @@ do
 		for i in `seq 1 4`
 		do
 			# Only create the movie if we have files for the previous hour
-			if ls ${previous_hour}*_${i}.jpg 1> /dev/null 2>&1
+			if ls ${previous_hour}*_${i}.png 1> /dev/null 2>&1
 			then
 				# Run in the background so that we can continue capturing screens.  Use 'nice' to not hit foreground apps too hard
-				(nice ffmpeg -framerate $snapshots_per_second -pattern_type glob -i "${previous_hour}*_${i}.jpg" -c:v libx264 ${videos_location}/${previous_hour}_${i}.mp4 > /dev/null 2>/dev/null ; rm ${previous_hour}*_${i}.jpg) &
+				(nice ffmpeg -framerate $snapshots_per_second -pattern_type glob -i "${previous_hour}*_${i}.png" -c:v libx264 ${videos_location}/${previous_hour}_${i}.mp4 > /dev/null 2>/dev/null ; rm ${previous_hour}*_${i}.png) &
 			fi
 		done
 		previous_hour=$current_hour
@@ -102,7 +102,7 @@ do
 		for i in `seq 1 4`
 		do
 			# Only create the movie if we have files for the previous day
-			if ls ${previous_day}*_${i}.jpg 1> /dev/null 2>&1
+			if ls ${previous_day}*_${i}.png 1> /dev/null 2>&1
 			then
 				(nice ffmpeg -f concat -i <(for f in $videos_location/$previous_day*_$i.mp4; do echo "file '$f'"; done) -c copy $videos_location/${previous_day}_${i}.mp4; rm $videos_location/$previous_day??_$i.mp4) &
 			fi
